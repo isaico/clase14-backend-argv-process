@@ -8,12 +8,10 @@ import AuthRouter from './router/auth.router.js';
 // import getRandomController from './router/random.router.js';
 import './config/db.config.js';
 import parseArgs from 'minimist';
-import {fork} from 'child_process'
-// import getRandom from './helpers/random.js'
-
+import { fork } from 'child_process';
 
 dotenv.config();
-const calc=fork('./src/helpers/random_sinBloqueo.js')
+const calc = fork('./src/helpers/random_sinBloqueo.js');
 const args = parseArgs(process.argv.slice(2));
 const PORT = args.port;
 const app = express();
@@ -33,34 +31,20 @@ app.set('views', path.resolve('src/views'));
 
 app.use('/user', UserRouter);
 app.use('/login', AuthRouter);
-// app.use('/api/randoms?', getRandomController);
+// app.use('/api/randoms?', getRandomController);//aca funciona con la forma bloqueante y modularizado
 
-app.get('/api/randoms?',(req,res)=>{
+app.get('/api/randoms?', (req, res) => {
   const { cant } = req.query;
-    calc.on('message',(resultado)=>{
-        console.log('resultado:',resultado)
-        res.status(200).json(resultado)
-    })
-    if(cant){
-      const stringCantidad = cant.toString()
-      calc.send(stringCantidad)
-    }else{
-      calc.send('10000000')
-    }
-})
-
-
-app.get('/', (req, res) => {
-  res.render('input');
-});
-
-app.get('/register', (req, res) => {
-  res.render('register');
-});
-
-app.get('/inicio', auth, (req, res) => {
-  const { user } = req.user;
-  res.render('index', { user: user.userName });
+  calc.on('message', (resultado) => {
+    console.log('resultado:', resultado);
+    res.status(200).json(resultado);
+  });
+  if (cant) {
+    const stringCantidad = cant.toString();
+    calc.send(stringCantidad);
+  } else {
+    calc.send('10000000');
+  }
 });
 app.get('/info', (req, res) => {
   const obj = {
@@ -74,6 +58,20 @@ app.get('/info', (req, res) => {
   };
   res.status(200).json({ obj });
 });
+
+app.get('/', (req, res) => {
+  res.render('input');
+});
+
+app.get('/register', (req, res) => {
+  res.render('register');
+});
+
+app.get('/inicio', auth, (req, res) => {
+  const { user } = req.user;
+  res.render('index', { user: user.userName });
+});
+
 const server = app.listen(PORT, () => {
   console.log(` 🚀🔥server is runing at http://localhost:${PORT} 🚀🔥`);
 });
